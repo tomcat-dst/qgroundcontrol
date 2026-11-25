@@ -32,6 +32,7 @@ struct APMPlaneMode
         THERMAL       = 24,
         LOITER2QLAND  = 25,
         AUTOLAND      = 26,
+        RFSEARCH      = 27,     // our ArduPlane build: AUTO with RF direction-finding sweeps
     };
 };
 
@@ -81,6 +82,7 @@ protected:
     const QString _thermalFlightMode = tr("Thermal");
     const QString _loiter2qlandFlightMode = tr("Loiter to QLand");
     const QString _autolandFlightMode = tr("Autoland");
+    const QString _rfSearchFlightMode = QStringLiteral("RFSearch");
 
 private:
     static bool _remapParamNameIntialized;

@@ -45,6 +45,7 @@ class VehicleGPS2FactGroup;
 class VehicleGPSFactGroup;
 class VehicleGPSAggregateFactGroup;
 class VehicleHygrometerFactGroup;
+class VehicleRFFactGroup;
 class VehicleLocalPositionFactGroup;
 class VehicleLocalPositionSetpointFactGroup;
 class VehicleRPMFactGroup;
@@ -248,6 +249,7 @@ public:
     Q_PROPERTY(FactGroup*           localPosition   READ localPositionFactGroup     CONSTANT)
     Q_PROPERTY(FactGroup*           localPositionSetpoint READ localPositionSetpointFactGroup CONSTANT)
     Q_PROPERTY(FactGroup*           hygrometer      READ hygrometerFactGroup        CONSTANT)
+    Q_PROPERTY(FactGroup*           rf              READ rfFactGroup                CONSTANT)
     Q_PROPERTY(FactGroup*           generator       READ generatorFactGroup         CONSTANT)
     Q_PROPERTY(FactGroup*           efi             READ efiFactGroup               CONSTANT)
     Q_PROPERTY(FactGroup*           radioStatus     READ radioStatusFactGroup       CONSTANT)
@@ -560,6 +562,7 @@ public:
     FactGroup* estimatorStatusFactGroup     ();
     FactGroup* terrainFactGroup             ();
     FactGroup* hygrometerFactGroup          ();
+    FactGroup* rfFactGroup                  ();
     FactGroup* generatorFactGroup           ();
     FactGroup* efiFactGroup                 ();
     FactGroup* radioStatusFactGroup         ();
@@ -819,6 +822,17 @@ signals:
     void mavlinkSerialControl           (uint8_t device, uint8_t flags, uint16_t timeout, uint32_t baudrate, QByteArray data);
 
     void mavlinkStatusChanged           ();
+
+    /// RF scan demo (cert-env): companion's NAMED_VALUE_FLOAT "RF_dBm", received power in dBm
+    void rfScanSample                   (double dbm);
+    /// RF scan demo (cert-env): companion's DEBUG_FLOAT_ARRAY "RF_BRG", one fitted bearing from an observation;
+    /// re-sent with the same id when the source it points at (0: none) changes
+    void rfBearing                      (int id, double lat, double lon, double bearing, double dbm, double sigma, int observation, int source, int wide);
+    /// RF scan demo (cert-env): companion's DEBUG_FLOAT_ARRAY "RF_FIX", one estimated source with its 1-sigma error
+    /// ellipse (semi-axes in m, azimuth of the major axis in deg); majorM < 0 removes it
+    void rfFix                          (int source, double lat, double lon, double majorM, double minorM, double orientDeg, int bearings);
+    /// RF scan demo (cert-env): companion's DEBUG_FLOAT_ARRAY "RF_TRU", a simulated source's true position
+    void rfTruth                        (int index, double lat, double lon);
 
     void isROIEnabledChanged            ();
     void roiCoordChanged                (const QGeoCoordinate& centerCoord);
@@ -1083,6 +1097,7 @@ public:
     const QString _estimatorStatusFactGroupName =    QStringLiteral("estimatorStatus");
     const QString _terrainFactGroupName =            QStringLiteral("terrain");
     const QString _hygrometerFactGroupName =         QStringLiteral("hygrometer");
+    const QString _rfFactGroupName =                 QStringLiteral("rf");
     const QString _generatorFactGroupName =          QStringLiteral("generator");
     const QString _efiFactGroupName =                QStringLiteral("efi");
     const QString _rpmFactGroupName =                QStringLiteral("rpm");
@@ -1102,6 +1117,7 @@ public:
     VehicleLocalPositionSetpointFactGroup* _localPositionSetpointFactGroup = nullptr;
     VehicleEstimatorStatusFactGroup*    _estimatorStatusFactGroup   = nullptr;
     VehicleHygrometerFactGroup*         _hygrometerFactGroup        = nullptr;
+    VehicleRFFactGroup*                 _rfFactGroup                = nullptr;
     VehicleGeneratorFactGroup*          _generatorFactGroup         = nullptr;
     VehicleEFIFactGroup*                _efiFactGroup               = nullptr;
     VehicleRPMFactGroup*                _rpmFactGroup               = nullptr;

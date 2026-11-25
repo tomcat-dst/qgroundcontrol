@@ -47,6 +47,8 @@ target_sources(${CMAKE_PROJECT_NAME}
         VehicleWindFactGroup.h
         VehicleHygrometerFactGroup.cc
         VehicleHygrometerFactGroup.h
+        VehicleRFFactGroup.cc
+        VehicleRFFactGroup.h
 )
 
 set(JSON_FILES
@@ -64,6 +66,7 @@ set(JSON_FILES
     DistanceSensorFact.json
     GeneratorFact.json
     HygrometerFact.json
+    RFFact.json
     RadioStatusFact.json
     TerrainFactGroup.json
     VehicleFact.json

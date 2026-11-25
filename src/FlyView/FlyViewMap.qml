@@ -320,6 +320,11 @@ FlightMap {
         largeMapView:   !pipMode
     }
 
+    // RF scan demo (cert-env): companion's received power as coloured antenna cones
+    RFScanMapItems {
+        map: _root
+    }
+
     GeoFenceMapVisuals {
         map:                    _root
         myGeoFenceController:   _geoFenceController

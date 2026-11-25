@@ -1,0 +1,39 @@
+{
+    "version":      1,
+    "fileType":  "FactMetaData",
+    "QGC.MetaData.Facts":
+[
+{
+    "name":             "dbm",
+    "shortDesc":        "RF power",
+    "type":             "double",
+    "decimalPlaces":    1,
+    "units":            "dBm"
+},
+{
+    "name":             "sweep",
+    "shortDesc":        "RF sweep",
+    "type":             "uint8",
+    "enumStrings":      "Tracking,Left,Right,Back,Return",
+    "enumValues":       "0,1,2,3,4"
+},
+{
+    "name":             "sweeps",
+    "shortDesc":        "RF sweeps",
+    "type":             "uint16",
+    "decimalPlaces":    0
+},
+{
+    "name":             "bearings",
+    "shortDesc":        "RF bearings",
+    "type":             "uint16",
+    "decimalPlaces":    0
+},
+{
+    "name":             "sources",
+    "shortDesc":        "RF sources",
+    "type":             "uint16",
+    "decimalPlaces":    0
+}
+]
+}

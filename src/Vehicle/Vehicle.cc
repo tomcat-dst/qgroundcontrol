@@ -13,6 +13,7 @@
 #include "VehicleGPSFactGroup.h"
 #include "VehicleGPSAggregateFactGroup.h"
 #include "VehicleHygrometerFactGroup.h"
+#include "VehicleRFFactGroup.h"
 #include "VehicleLocalPositionFactGroup.h"
 #include "VehicleLocalPositionSetpointFactGroup.h"
 #include "VehicleRPMFactGroup.h"
@@ -321,6 +322,7 @@ void Vehicle::_commonInit(LinkInterface* link)
     _localPositionSetpointFactGroup = new VehicleLocalPositionSetpointFactGroup(this);
     _estimatorStatusFactGroup       = new VehicleEstimatorStatusFactGroup(this);
     _hygrometerFactGroup            = new VehicleHygrometerFactGroup(this);
+    _rfFactGroup                    = new VehicleRFFactGroup(this);
     _generatorFactGroup             = new VehicleGeneratorFactGroup(this);
     _efiFactGroup                   = new VehicleEFIFactGroup(this);
     _rpmFactGroup                   = new VehicleRPMFactGroup(this);
@@ -355,6 +357,7 @@ void Vehicle::_commonInit(LinkInterface* link)
     _addFactGroup(_localPositionSetpointFactGroup,_localPositionSetpointFactGroupName);
     _addFactGroup(_estimatorStatusFactGroup,   _estimatorStatusFactGroupName);
     _addFactGroup(_hygrometerFactGroup,        _hygrometerFactGroupName);
+    _addFactGroup(_rfFactGroup,                _rfFactGroupName);
     _addFactGroup(_generatorFactGroup,         _generatorFactGroupName);
     _addFactGroup(_efiFactGroup,               _efiFactGroupName);
     _addFactGroup(_rpmFactGroup,               _rpmFactGroupName);
@@ -422,6 +425,7 @@ FactGroup* Vehicle::localPositionSetpointFactGroup() { return _localPositionSetp
 FactGroup* Vehicle::estimatorStatusFactGroup()      { return _estimatorStatusFactGroup; }
 FactGroup* Vehicle::terrainFactGroup()              { return _terrainFactGroup; }
 FactGroup* Vehicle::hygrometerFactGroup()           { return _hygrometerFactGroup; }
+FactGroup* Vehicle::rfFactGroup()                   { return _rfFactGroup; }
 FactGroup* Vehicle::generatorFactGroup()            { return _generatorFactGroup; }
 FactGroup* Vehicle::efiFactGroup()                  { return _efiFactGroup; }
 FactGroup* Vehicle::rpmFactGroup()                  { return _rpmFactGroup; }
@@ -663,6 +667,32 @@ void Vehicle::_mavlinkMessageReceived(LinkInterface* link, mavlink_message_t mes
     case MAVLINK_MSG_ID_ADSB_VEHICLE:
         ADSBVehicleManager::instance()->mavlinkMessageReceived(message);
         break;
+    case MAVLINK_MSG_ID_NAMED_VALUE_FLOAT:
+    {
+        // RF scan demo (cert-env): the companion's analyzer reading, drawn by RFScanMapItems.qml
+        mavlink_named_value_float_t nvf{};
+        mavlink_msg_named_value_float_decode(&message, &nvf);
+        if (QString::fromLatin1(nvf.name, strnlen(nvf.name, sizeof(nvf.name))) == QStringLiteral("RF_dBm")) {
+            emit rfScanSample(static_cast<double>(nvf.value));
+        }
+        break;
+    }
+    case MAVLINK_MSG_ID_DEBUG_FLOAT_ARRAY:
+    {
+        // RF scan demo (cert-env): the companion's fitted bearings and source fixes
+        mavlink_debug_float_array_t dfa{};
+        mavlink_msg_debug_float_array_decode(&message, &dfa);
+        const QString name = QString::fromLatin1(dfa.name, strnlen(dfa.name, sizeof(dfa.name)));
+        if (name == QStringLiteral("RF_BRG")) {
+            emit rfBearing(static_cast<int>(dfa.data[6]), dfa.data[0], dfa.data[1], dfa.data[2], dfa.data[3], dfa.data[4],
+                           static_cast<int>(dfa.data[5]), static_cast<int>(dfa.data[7]), static_cast<int>(dfa.data[8]));
+        } else if (name == QStringLiteral("RF_FIX")) {
+            emit rfFix(dfa.array_id, dfa.data[0], dfa.data[1], dfa.data[2], dfa.data[4], dfa.data[5], static_cast<int>(dfa.data[3]));
+        } else if (name == QStringLiteral("RF_TRU")) {
+            emit rfTruth(dfa.array_id, dfa.data[0], dfa.data[1]);
+        }
+        break;
+    }
     case MAVLINK_MSG_ID_HIGH_LATENCY:
         _handleHighLatency(message);
         break;
