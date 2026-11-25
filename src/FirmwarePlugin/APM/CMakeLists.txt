@@ -96,6 +96,14 @@ foreach(_pdef IN LISTS _apm_pdef_files)
 
     string(REPLACE "-" "." _version_dots "${_version}")
 
+    # a local copy with parameters our ArduPilot build adds (e.g. RFS_ for the RFSEARCH mode) replaces the
+    # downloaded one for that version
+    set(_override "${CMAKE_CURRENT_SOURCE_DIR}/ParameterMetaDataOverride/${_dirname}/apm.pdef.json")
+    if(EXISTS "${_override}")
+        message(STATUS "APM: ${_dirname} parameter metadata from ${_override}")
+        set(_pdef "${_override}")
+    endif()
+
     set(_alias "FirmwarePlugin/APM/APMParameterFactMetaData.${_vehicle}.${_version_dots}.json")
     set_source_files_properties("${_pdef}" PROPERTIES QT_RESOURCE_ALIAS "${_alias}")
     list(APPEND _apm_param_resources "${_pdef}")
